@@ -1,0 +1,2 @@
+Start SocketServer and connect to localhost
+Run SocketClient for additional windows
