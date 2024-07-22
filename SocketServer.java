@@ -9,26 +9,34 @@ import java.util.ArrayList;
 
 public class SocketServer {
     ServerSocket server;
+    ServerSocket server2;
     Socket sk;
+    Socket sk2;
     InetAddress addr;
+    InetAddress addr2;
     
     ArrayList<ServerThread> list = new ArrayList<ServerThread>();
 
     public SocketServer() {
         try {
         	addr = InetAddress.getByName("127.0.0.1");
-        	//addr = InetAddress.getByName("192.168.43.1");
+        	addr2 = InetAddress.getByName("192.168.43.1");
             
         	server = new ServerSocket(1234,50,addr);
+            server2 = new ServerSocket(5678,50,addr2);
             System.out.println("\n Waiting for Client connection");
             SocketClient.main(null);
             while(true) {
                 sk = server.accept();
+                sk2 = server2.accept();
                 System.out.println(sk.getInetAddress() + " connect");
 
                 //Thread connected clients to ArrayList
                 ServerThread st = new ServerThread(this);
+                ServerThread st2 = new ServerThread(this);
+                addThread(st2);
                 addThread(st);
+                st2.start();
                 st.start();
             }
         } catch(IOException e) {
