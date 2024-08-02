@@ -6,13 +6,13 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class SocketServer {
     ServerSocket server;
     ServerSocket server2;
     Socket sk;
     InetAddress addr;
-
     ArrayList<ServerThread> list = new ArrayList<ServerThread>();
 
     public SocketServer() {
@@ -58,6 +58,8 @@ class ServerThread extends Thread {
     SocketServer server;
     PrintWriter pw;
     String name;
+    static HashSet<String> userList = new HashSet<>();
+
 
     public ServerThread(SocketServer server) {
         this.server = server;
@@ -72,6 +74,8 @@ class ServerThread extends Thread {
             // writing
             pw = new PrintWriter(server.sk.getOutputStream(), true);
             name = br.readLine();
+            userList.add(name);
+
             server.broadCast("**["+name+"] Entered**");
 
             String data;

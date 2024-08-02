@@ -4,7 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 
 @SuppressWarnings("serial")
 public class SocketClient extends JFrame implements ActionListener, Runnable {
@@ -31,17 +33,19 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
 
         textArea.setBackground(new Color(0, 0, 0));
 
-/*
-         JMenu helpMenu = new JMenu("Help");
-        JMenuItem update = new JMenuItem("Update Information");
-        JMenuItem connect_List = new JMenuItem("Visitor List");
 
-        helpMenu.add(update);
-        helpMenu.add(connect_List);
+        JMenu helpMenu = new JMenu("Help");
+//        JMenuItem docu = new JMenuItem("Documentation");
+        JMenuItem connectList = new JMenuItem("User List");
+
+//        helpMenu.add(docu);
+        helpMenu.add(connectList);
+
+        connectList.addActionListener(e -> JOptionPane.showMessageDialog(this, "User List " + ServerThread.userList.toString()));
 
         menuBar.add(helpMenu);
         setJMenuBar(menuBar);
-*/
+
         getContentPane().add(jp, "Center");
         input_Text.setText("Enter your Message:");
         input_Text.setToolTipText("Enter your Message");
@@ -66,6 +70,8 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
             sk = new Socket(IP, 1234);
 
             String name = JOptionPane.showInputDialog(this, "Please enter a nickname", JOptionPane.INFORMATION_MESSAGE);
+//            this.username = name;
+//            this.userList.add(this.username);
 /*            while (name.length() > 7) {
                 name = JOptionPane.showInputDialog(this, "Please enter a nickname.(7 characters or less)", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -76,7 +82,8 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
             //writing
             pw = new PrintWriter(sk.getOutputStream(), true);
             pw.println(name); // Send to server side
-            this.username = name;
+
+
             new Thread(this).start();
 
         } catch (Exception e) {
@@ -105,7 +112,10 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
     public void actionPerformed(ActionEvent e) {
         String data = input_Text.getText();
         pw.println(data); // Send to server side
+
         this.fileLog.log("Date: " + new Date() + "\n User: " + this.username + "\n Message: " + data);
+//        this.userList.add(this.username);
+
         input_Text.setText("");
     }
 }
