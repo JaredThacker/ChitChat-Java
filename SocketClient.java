@@ -2,10 +2,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
+import java.util.Date;
 
 @SuppressWarnings("serial")
 public class SocketClient extends JFrame implements ActionListener, Runnable {
@@ -13,6 +12,8 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
     JScrollPane jp = new JScrollPane(textArea);
     JTextField input_Text = new JTextField();
     JMenuBar menuBar = new JMenuBar();
+    FileLog fileLog = new FileLog("app.log");
+    String username;
 
     Socket sk;
     BufferedReader br;
@@ -75,7 +76,7 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
             //writing
             pw = new PrintWriter(sk.getOutputStream(), true);
             pw.println(name); // Send to server side
-
+            this.username = name;
             new Thread(this).start();
 
         } catch (Exception e) {
@@ -104,6 +105,7 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
     public void actionPerformed(ActionEvent e) {
         String data = input_Text.getText();
         pw.println(data); // Send to server side
+        this.fileLog.log("Date: " + new Date() + "\n User: " + this.username + "\n Message: " + data);
         input_Text.setText("");
     }
 }
