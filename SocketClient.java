@@ -4,15 +4,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 
 @SuppressWarnings("serial")
 public class SocketClient extends JFrame implements ActionListener, Runnable {
     JTextArea textArea = new JTextArea();
     JScrollPane jp = new JScrollPane(textArea);
     JTextField input_Text = new JTextField();
+    JTextArea jText = new JTextArea();
     JMenuBar menuBar = new JMenuBar();
     FileLog fileLog = new FileLog("app.log");
     String username;
@@ -35,12 +34,34 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
 
 
         JMenu helpMenu = new JMenu("Help");
-//        JMenuItem docu = new JMenuItem("Documentation");
+        JMenuItem docu = new JMenuItem("Documentation");
         JMenuItem connectList = new JMenuItem("User List");
 
-//        helpMenu.add(docu);
+        helpMenu.add(docu);
         helpMenu.add(connectList);
 
+        BufferedReader br = null;
+
+        try {
+            br = new BufferedReader(new FileReader("documentation.txt"));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+
+            while (line != null) {
+                sb.append(line).append("\n");
+                line = br.readLine();
+            }
+            String everything = sb.toString();
+            this.jText.append(everything);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        docu.addActionListener(e -> JOptionPane.showMessageDialog(this, this.jText));
         connectList.addActionListener(e -> JOptionPane.showMessageDialog(this, "User List " + ServerThread.userList.toString()));
 
         menuBar.add(helpMenu);
