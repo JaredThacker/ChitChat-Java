@@ -1,2 +1,4 @@
-Start SocketServer and connect to localhost
-Run SocketClient for additional windows
+Start SocketServer and connect to localhost.
+Enter nickname.
+Run SocketClient for additional windows.
+Access User List in Help menu.
