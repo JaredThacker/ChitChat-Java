@@ -75,7 +75,7 @@ class ServerThread extends Thread {
             pw = new PrintWriter(server.sk.getOutputStream(), true);
             name = br.readLine();
             userList.add(name);
-
+            server.broadCast("Users: " + userList);
             server.broadCast("**["+name+"] Entered**");
 
             String data;
