@@ -1,7 +1,7 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -58,6 +58,9 @@ class ServerThread extends Thread {
     SocketServer server;
     PrintWriter pw;
     String name;
+    JFileChooser jFileChooser = new JFileChooser();
+    File file;
+    Image image;
     static HashSet<String> userList = new HashSet<>();
 
 
@@ -75,13 +78,27 @@ class ServerThread extends Thread {
             pw = new PrintWriter(server.sk.getOutputStream(), true);
             name = br.readLine();
             userList.add(name);
-            server.broadCast("Users: " + userList);
+            server.broadCast("Users: " + userList.toString());
             server.broadCast("**["+name+"] Entered**");
 
             String data;
             while((data = br.readLine()) != null ){
-                if(data == "/list"){
-                    pw.println("a");
+                if(data == "/image"){
+                    jFileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                    int response = jFileChooser.showOpenDialog(null);
+//                    JFrame frame = new JFrame();
+                    JPanel panel = new JPanel();
+
+                    if(response == jFileChooser.APPROVE_OPTION) {
+                        file = jFileChooser.getSelectedFile();
+                        ImageIcon imageIcon = new ImageIcon(file.getAbsolutePath());
+                        panel.add(new JLabel(imageIcon));
+                        try {
+                            image = ImageIO.read(file);
+                        } catch (IOException e){
+                            System.out.printf("image not found");
+                        }
+                    }
                 }
                 server.broadCast("["+name+"] "+ data);
             }
