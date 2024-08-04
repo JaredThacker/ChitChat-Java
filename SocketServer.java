@@ -59,6 +59,7 @@ class ServerThread extends Thread {
     PrintWriter pw;
     String name;
     JFileChooser jFileChooser = new JFileChooser();
+    DataInputStream dis;
     File file;
     Image image;
     static HashSet<String> userList = new HashSet<>();
@@ -76,6 +77,7 @@ class ServerThread extends Thread {
 
             // writing
             pw = new PrintWriter(server.sk.getOutputStream(), true);
+            dis = new DataInputStream(server.sk.getInputStream());
             name = br.readLine();
             userList.add(name);
             server.broadCast("Users: " + userList.toString());
@@ -83,24 +85,12 @@ class ServerThread extends Thread {
 
             String data;
             while((data = br.readLine()) != null ){
-                if(data == "/image"){
-                    jFileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-                    int response = jFileChooser.showOpenDialog(null);
-//                    JFrame frame = new JFrame();
-                    JPanel panel = new JPanel();
+                if(data.startsWith("FILE:")){
+                    handleFile();
+                } else {
+                    server.broadCast("["+name+"] "+ data);
 
-                    if(response == jFileChooser.APPROVE_OPTION) {
-                        file = jFileChooser.getSelectedFile();
-                        ImageIcon imageIcon = new ImageIcon(file.getAbsolutePath());
-                        panel.add(new JLabel(imageIcon));
-                        try {
-                            image = ImageIO.read(file);
-                        } catch (IOException e){
-                            System.out.printf("image not found");
-                        }
-                    }
                 }
-                server.broadCast("["+name+"] "+ data);
             }
         } catch (Exception e) {
             //Remove the current thread from the ArrayList.
@@ -108,6 +98,31 @@ class ServerThread extends Thread {
             server.broadCast("**["+name+"] Left**");
             System.out.println(server.sk.getInetAddress()+" - ["+name+"] Exit");
             System.out.println(e + "---->");
+        }
+    }
+
+
+    private void handleFile() {
+        try {
+            String fileName = dis.readUTF();
+            long fileSize = dis.readLong();
+            File receivedFile = new File("received_" + fileName);
+
+            try (FileOutputStream fos = new FileOutputStream(receivedFile);
+                 BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while (fileSize > 0 && (bytesRead = dis.read(buffer, 0, (int) Math.min(buffer.length, fileSize))) != -1) {
+                    bos.write(buffer, 0, bytesRead);
+                    fileSize -= bytesRead;
+                }
+                bos.flush();
+                System.out.println("File received: " + receivedFile.getAbsolutePath());
+                server.broadCast("[" + name + "] sent an image: " + fileName);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
