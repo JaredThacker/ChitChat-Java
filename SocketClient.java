@@ -14,12 +14,14 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
     JTextField input_Text = new JTextField();
     JTextArea jText = new JTextArea();
     JMenuBar menuBar = new JMenuBar();
+    JButton sendImageButton;
     FileLog fileLog = new FileLog("app.log");
     String username;
 
     Socket sk;
     BufferedReader br;
     PrintWriter pw;
+    DataOutputStream dos;
 
     public SocketClient() {
         super("Chit Chat");
@@ -74,7 +76,9 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
         input_Text.setForeground(new Color(0, 0, 0));
         input_Text.setFont(new Font("Tahoma", Font.BOLD, 11));
         input_Text.setBackground(new Color(230, 230, 250));
-        
+
+        sendImageButton = new JButton("Send Image");
+        getContentPane().add(sendImageButton, "South");
         getContentPane().add(input_Text, "South");
         setSize(325, 411);
         setVisible(true);
@@ -84,6 +88,8 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         input_Text.addActionListener(this); //Event registration
+        sendImageButton.addActionListener(e -> selectAndSendImage());
+        helpMenu.add(sendImageButton);
     }
 
     public void serverConnection() {
@@ -105,11 +111,48 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
             pw = new PrintWriter(sk.getOutputStream(), true);
             pw.println(name); // Send to server side
 
+            dos = new DataOutputStream(sk.getOutputStream()); //to send files
+
 
             new Thread(this).start();
 
         } catch (Exception e) {
             System.out.println(e + " Socket Connection error");
+        }
+    }
+
+    private void selectAndSendImage() {
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showOpenDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            if (file.isFile()) {
+                sendImageFile(file);
+            }
+        }
+    }
+
+    private void sendImageFile(File file) {
+        try (FileInputStream fis = new FileInputStream(file);
+             BufferedInputStream bis = new BufferedInputStream(fis)) {
+
+            // Send file name and length
+            dos.writeUTF(file.getName());
+            dos.writeLong(file.length());
+
+            // Send file data
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = bis.read(buffer)) != -1) {
+                dos.write(buffer, 0, bytesRead);
+            }
+            dos.flush();
+
+            textArea.append("Image file sent: " + file.getName() + "\n");
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
